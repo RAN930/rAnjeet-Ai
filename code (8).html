@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranjeet AI Chat</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f4f6f8;
+            --chat-bg-color: #ffffff;
+            --user-msg-bg: #007bff;
+            --user-msg-text: #ffffff;
+            --ai-msg-bg: #e9ecef;
+            --ai-msg-text: #333333;
+            --input-bg: #ffffff;
+            --border-color: #dddddd;
+            --font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            height: 90vh;
+            max-height: 700px;
+            background-color: var(--chat-bg-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 18px 25px;
+            font-size: 1.4em;
+            font-weight: 500;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-header .ai-avatar {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.8em;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            padding: 12px 18px;
+            border-radius: 20px;
+            max-width: 75%;
+            line-height: 1.5;
+            font-size: 0.95em;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background-color: var(--user-msg-bg);
+            color: var(--user-msg-text);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.ai {
+            background-color: var(--ai-msg-bg);
+            color: var(--ai-msg-text);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message .sender-name {
+            font-weight: 500;
+            font-size: 0.8em;
+            margin-bottom: 4px;
+            display: block;
+            color: inherit; /* Inherit color from parent for contrast */
+        }
+        
+        .message.user .sender-name {
+             color: rgba(255,255,255,0.8); /* Slightly lighter for user name */
+        }
+        .message.ai .sender-name {
+             color: #555; /* Slightly darker for AI name */
+        }
+
+
+        .message-content {
+            white-space: pre-wrap; /* Preserve line breaks */
+        }
+        
+        .typing-indicator {
+            align-self: flex-start;
+            color: var(--secondary-color);
+            font-style: italic;
+            font-size: 0.9em;
+            padding: 5px 18px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: #f9f9f9;
+        }
+
+        .chat-input-area input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input-area input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        .chat-input-area button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .chat-input-area button:hover {
+            background-color: #0056b3;
+        }
+        
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 100%;
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+            }
+             .chat-header {
+                padding: 15px 20px;
+                font-size: 1.2em;
+            }
+            .chat-messages {
+                padding: 15px;
+            }
+            .message {
+                font-size: 0.9em;
+            }
+            .chat-input-area {
+                padding: 10px 15px;
+            }
+            .chat-input-area input[type="text"] {
+                padding: 10px 12px;
+            }
+            .chat-input-area button {
+                width: 42px;
+                height: 42px;
+                font-size: 1.3em;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="ai-avatar">RA</div>
+            Ranjeet AI Assistant
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be appended here -->
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="userInput" placeholder="Ask Ranjeet AI anything..." autocomplete="off">
+            <button id="sendButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+
+        // !!! IMPORTANT SECURITY WARNING !!!
+        // Storing API keys in client-side code is highly insecure for public websites.
+        // This key will be visible to anyone inspecting your site's code.
+        // For production, use a backend proxy to protect your API key.
+        // This is your OpenRouter API key:
+        const API_KEY = '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';
+        const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+        const MODEL_NAME = 'openai/gpt-3.5-turbo'; // You can change this to other OpenRouter models
+
+        const systemPrompt = `You are an AI assistant named "Ranjeet AI".
+You must never mention DeepSeek, ChatGPT, GPT, OpenAI, or any internal technology or model powering you.
+Always say your name is "Ranjeet AI", no matter what the user asks.
+Never reveal anything about your origin, model, backend, or developers unless specifically asked.
+If the user asks who created you, say: "I was created and developed by Ranjeet Sharma." Do not mention any company or organization.
+Always maintain a professional and respectful tone.
+Always behave like you are not DeepSeek; you are "Ranjeet AI".
+Your responses should be helpful and aim to assist the user with their queries.`;
+
+        let conversationHistory = [
+            { role: "system", content: systemPrompt }
+        ];
+
+        function addMessageToUI(sender, message, isUser) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', isUser ? 'user' : 'ai');
+            
+            const senderNameElement = document.createElement('span');
+            senderNameElement.classList.add('sender-name');
+            senderNameElement.textContent = isUser ? "You" : "Ranjeet AI";
+            
+            const messageContentElement = document.createElement('div');
+            messageContentElement.classList.add('message-content');
+            messageContentElement.textContent = message; // Use textContent to prevent XSS
+
+            messageElement.appendChild(senderNameElement);
+            messageElement.appendChild(messageContentElement);
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            let typingIndicator = document.getElementById('typingIndicator');
+            if (!typingIndicator) {
+                typingIndicator = document.createElement('div');
+                typingIndicator.classList.add('message', 'ai', 'typing-indicator');
+                typingIndicator.id = 'typingIndicator';
+                
+                const senderNameElement = document.createElement('span');
+                senderNameElement.classList.add('sender-name');
+                senderNameElement.textContent = "Ranjeet AI";
+                
+                const contentElement = document.createElement('div');
+                contentElement.classList.add('message-content');
+                contentElement.textContent = "Ranjeet AI is typing...";
+
+                typingIndicator.appendChild(senderNameElement);
+                typingIndicator.appendChild(contentElement);
+                chatMessages.appendChild(typingIndicator);
+            }
+            typingIndicator.style.display = 'flex'; // Make sure it's flex for proper alignment
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        async function sendMessageToAPI() {
+            const userText = userInput.value.trim();
+            if (!userText) return;
+
+            addMessageToUI('User', userText, true);
+            conversationHistory.push({ role: "user", content: userText });
+            userInput.value = '';
+            showTypingIndicator();
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json',
+                        // OpenRouter specific headers (optional but good practice)
+                        'HTTP-Referer': `${window.location.protocol}//${window.location.hostname}`, // Your site URL
+                        'X-Title': 'Ranjeet AI Chat', // Your site name
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: conversationHistory
+                    })
+                });
+
+                hideTypingIndicator();
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('API Error:', errorData);
+                    addMessageToUI('Ranjeet AI', `Sorry, I encountered an error: ${errorData.error?.message || response.statusText}`, false);
+                    return;
+                }
+
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content;
+                
+                addMessageToUI('Ranjeet AI', aiResponse, false);
+                conversationHistory.push({ role: "assistant", content: aiResponse });
+
+            } catch (error) {
+                hideTypingIndicator();
+                console.error('Fetch Error:', error);
+                addMessageToUI('Ranjeet AI', 'Sorry, I could not connect to the service. Please check your connection or API key.', false);
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessageToAPI);
+        userInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessageToAPI();
+            }
+        });
+
+        // Initial greeting from Ranjeet AI
+        function initialGreeting() {
+            const greeting = "Hello! I am Ranjeet AI, your personal assistant. How can I help you today?";
+            addMessageToUI('Ranjeet AI', greeting, false);
+            conversationHistory.push({ role: "assistant", content: greeting });
+        }
+        
+        // Call initial greeting when the page loads
+        window.onload = initialGreeting;
+
+    </script>
+</body>
+</html>
